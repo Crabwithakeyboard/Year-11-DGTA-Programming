@@ -2,6 +2,7 @@ import pygame as p
 from pygame import image
 from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
+from Scripts.tilemap import Tilemap 
 import sys
 
 class Game: # Object Oriented Programming. This makes the code more efficient and less prone to corruption
@@ -41,6 +42,8 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
 
         self.player = EntityPhysics(self, 'player', (50, 50), (32, 32))
 
+        self.tilemap = Tilemap(self, tile_size=32)
+
     def run(self):
 
         while True:
@@ -48,6 +51,8 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
             self.clock.tick(60)
             #background always renders first to prevent things from being covered by it
             self.display.blit(self.bg, (0,0))
+
+            self.tilemap.render(self.display)
 
             self.player.update((self.movement[1] - self.movement[0], 0))
             self.player.render(self.display)
@@ -69,7 +74,8 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
                     if event.key == p.K_d:
                         self.movement[1] = False #stops moving right
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
-            p.display.update() 
+
+
             p.display.flip()
 
 # Calls the class and runs the game.    

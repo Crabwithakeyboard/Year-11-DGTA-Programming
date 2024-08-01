@@ -1,4 +1,4 @@
-import os
+import os #operating system
 import pygame as p
 
 BASE_IMAGE_PATH = 'Data/images/' #this will be the default folder that python will try to pull images out of 
