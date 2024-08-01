@@ -1,6 +1,6 @@
 import pygame as p
 from pygame import image
-from Scripts.utility_code import load_image
+from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
 import sys
 
@@ -30,9 +30,14 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
         self.movement = [False, False]
 
         self.assets = {
+            'grass' : load_images('Tiles/Grass'),
+            'path' : load_images('Tiles/Path'),
+            'axe_head' : load_images('Tiles/Axe_head'),
+            'decor' : load_images('Tiles/Decor'),
             'player': load_image('Entity_sprites/Player/Player.png')
         }
-
+        
+        print(self.assets)
 
         self.player = EntityPhysics(self, 'player', (50, 50), (32, 32))
 
