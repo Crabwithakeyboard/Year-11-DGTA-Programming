@@ -11,10 +11,13 @@ class EntityPhysics: #This class will handle the physics calculations for all en
         self.velocity = [0, 0] #the velocity of the entity, [x, y]
 
     def update(self, movement = (0, 0)): #movement = (x, y)
-        perFrame_movement = (movement[0] + self.velocity[0], movement[1], self.velocity[1]) #how much and in what direction the entity should be moved in this frame
+        perFrame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1]) #how much and in what direction the entity should be moved in this frame
 
         self.pos[0] += perFrame_movement[0]
         self.pos[1] += perFrame_movement[1]
+
+        
+        self.velocity[1] += 0.1
 
     def render(self, surf):
         surf.blit(self.main.assets['player'], self.pos)

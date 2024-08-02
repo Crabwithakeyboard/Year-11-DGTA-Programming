@@ -12,7 +12,7 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
         p.init()
 
         #display size
-        self.screen_size = (640, 480)
+        self.screen_size = (1280, 960)
         self.win = p.display.set_mode(self.screen_size) #window size
 
         self.display = p.Surface((320, 240)) #actual game render surface size
@@ -40,9 +40,9 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
         
         print(self.assets)
 
-        self.player = EntityPhysics(self, 'player', (50, 50), (32, 32))
+        self.player = EntityPhysics(self, 'player', (50, 50), (16, 16))
 
-        self.tilemap = Tilemap(self, tile_size=32)
+        self.tilemap = Tilemap(self, tile_size=16)
 
     def run(self):
 
