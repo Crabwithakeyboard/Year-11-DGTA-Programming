@@ -38,9 +38,8 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
             'player': load_image('Entity_sprites/Player/Player.png')
         }
         
-        print(self.assets)
 
-        self.player = EntityPhysics(self, 'player', (50, 50), (16, 16))
+        self.player = EntityPhysics(self, 'player', (80, 100), (16, 16))
 
         self.tilemap = Tilemap(self, tile_size=16)
 
@@ -54,8 +53,7 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
 
             self.tilemap.render(self.display)
 
-            self.player.update((self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display)
+
 
 
             #==== INPUTS ====#
@@ -73,7 +71,12 @@ class Game: # Object Oriented Programming. This makes the code more efficient an
                         self.movement[0] = False #stops moving left
                     if event.key == p.K_d:
                         self.movement[1] = False #stops moving right
+
+            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
+            self.player.render(self.display)
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
+
+            
 
 
             p.display.flip()
