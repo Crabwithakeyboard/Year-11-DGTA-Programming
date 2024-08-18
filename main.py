@@ -5,7 +5,7 @@ from Scripts.entities import EntityPhysics
 from Scripts.tilemap import Tilemap
 import sys
 
-INTERACTABLE_TILES = {'stool'}  # These are the tiles that can be interacted with
+
 
 class Game:
     def __init__(self):
@@ -39,9 +39,9 @@ class Game:
             'player': load_image('Entity_sprites/Player/Player.png')
         }
 
-        self.player = EntityPhysics(self, 'player', (80, 1), (32, 32))
-        self.tilemap = Tilemap(self, tile_size=32)
-
+        self.player = EntityPhysics(self, 'player', (80, 1), (32, 32))#Runs the EntityPhysics code on self.player
+        self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
+        self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
        
 
     def run(self):
@@ -50,8 +50,10 @@ class Game:
             self.clock.tick(60)
             # Background always renders first to prevent things from being covered by it
             self.display.blit(self.bg, (0, 0))
+            print(str(self.cam_scroll[0]) + ',' + str(self.cam_scroll[1]))
+            self.cam_scroll[0] += (self.player.physics_rect().centerx - self.display.get_width() / 2 - self.cam_scroll[0]) / 10
 
-            self.tilemap.render(self.display)
+            self.tilemap.render(self.display, camera_scroll = self.cam_scroll)
 
             # ==== INPUTS ====#
             for event in p.event.get():
@@ -64,13 +66,13 @@ class Game:
                     if event.key == p.K_d:
                         self.movement[1] = True  # Moves right
                     if event.key == p.K_w:
-                        self.player.velocity[1] = -4
+                        self.player.velocity[1] = -4 #upward velocity set to 4, makes player jump
                     if event.key == p.K_s:
-                        self.interact = True
-                        for rect in self.tilemap.interact_rects(self.player.pos):
-                            if self.player.physics_rect().colliderect(rect):
-                                print('Interacted with stool!')
-                                for loc, tile in self.tilemap.tilemap.items():
+                        self.interact = True #If player presses 's' key, then the player is trying to interact with something, so set the interact value to true.
+                        for rect in self.tilemap.interact_rects(self.player.pos): # runs the indented code for every tile in the 'inter_rects' list in the interact_rects function in tilemap.py
+                            if self.player.physics_rect().colliderect(rect): # Checks if the player's collision hitbox collides with the interactive rects' hitbox
+                                print('Interacted') #Used in testing to check if the player has actually interacted with the tile
+                                for loc, tile in self.tilemap.tilemap.items(): 
                                     if tile['type'] == 'stool' and tile['pos'] == (rect.x // self.tilemap.tile_size, rect.y // self.tilemap.tile_size):
                                         tile['var'] = 1
                 if event.type == p.KEYUP:
@@ -82,8 +84,8 @@ class Game:
                         self.interact = False
 
 
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display)
+            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
+            self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
 
             p.display.flip()

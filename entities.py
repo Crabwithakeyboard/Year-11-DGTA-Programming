@@ -58,5 +58,5 @@ class EntityPhysics: #This class will handle the physics calculations for all en
             self.velocity[1] = 0
 
 
-    def render(self, surf):
-        surf.blit(self.main.assets['player'], self.pos)
+    def render(self, surf, camera_scroll = (0,0)):
+        surf.blit(self.main.assets['player'], (self.pos[0] - camera_scroll[0], self.pos[1] - camera_scroll[1]))
