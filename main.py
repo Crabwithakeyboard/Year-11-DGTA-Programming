@@ -2,6 +2,7 @@ import pygame as p
 from pygame import image
 from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
+from Scripts.entities import Arrow
 from Scripts.tilemap import Tilemap
 import sys
 
@@ -36,10 +37,12 @@ class Game:
             'axe_head': load_images('Tiles/Axe_head'),
             'decor': load_images('Tiles/Decor'),
             'stool': load_images('Tiles/Stool'),
-            'player': load_image('Entity_sprites/Player/Player.png')
+            'player': load_image('Entity_sprites/Player/Player.png'),
+            'arrow' : load_image('Entity_sprites/Arrow/arrow.png')
         }
-
+        print(self.assets)
         self.player = EntityPhysics(self, 'player', (80, 1), (32, 32))#Runs the EntityPhysics code on self.player
+        self.arrow = Arrow(self, 'arrow', (100, 100), (32, 32))
         self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
         self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
        
@@ -74,7 +77,13 @@ class Game:
                                 print('Interacted') #Used in testing to check if the player has actually interacted with the tile
                                 for loc, tile in self.tilemap.tilemap.items(): 
                                     if tile['type'] == 'stool' and tile['pos'] == (rect.x // self.tilemap.tile_size, rect.y // self.tilemap.tile_size):
-                                        tile['var'] = 1
+                                        if len(self.assets[tile['type']]) > 1:
+                                            tile['var'] = 1  # Set the stool variant to 1
+                                            #print(f"Stool at {tile['pos']} changed to variant {tile['var']}")  # Debugging
+                                        #else:
+                                            #print(f"No variant 1 available for {tile['type']}")  # Debugging
+                    if event.key == p.K_SPACE:
+                        self.arrow.charge = True
                 if event.type == p.KEYUP:
                     if event.key == p.K_a:
                         self.movement[0] = False  # Stops moving left
@@ -82,10 +91,14 @@ class Game:
                         self.movement[1] = False  # Stops moving right
                     if event.key == p.K_s:
                         self.interact = False
+                    if event.key == p.K_SPACE:
+                        self.charge = False
 
 
             self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
             self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
+            self.arrow.update(self.tilemap, (0, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
+            self.arrow.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
 
             p.display.flip()
