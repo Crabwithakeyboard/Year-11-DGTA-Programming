@@ -3,6 +3,7 @@ from pygame import image
 from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
 from Scripts.entities import Arrow
+from Scripts.entities import Bullet
 from Scripts.tilemap import Tilemap
 import sys
 
@@ -42,10 +43,13 @@ class Game:
         }
         print(self.assets)
         self.player = EntityPhysics(self, 'player', (80, 1), (32, 32))#Runs the EntityPhysics code on self.player
-        self.arrow = Arrow(self, 'arrow', (100, 100), (32, 32))
+        self.arrow = Arrow(self, 'arrow', (0,0), (32, 32))
         self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
         self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
-       
+        self.arrows = []
+        self.bullets = []
+        
+
 
     def run(self):
         while True:
@@ -57,6 +61,9 @@ class Game:
             self.cam_scroll[0] += (self.player.physics_rect().centerx - self.display.get_width() / 2 - self.cam_scroll[0]) / 10
 
             self.tilemap.render(self.display, camera_scroll = self.cam_scroll)
+            
+            self.pos = (self.player.pos[0] , self.player.pos[1] )
+
 
             # ==== INPUTS ====#
             for event in p.event.get():
@@ -83,7 +90,15 @@ class Game:
                                         #else:
                                             #print(f"No variant 1 available for {tile['type']}")  # Debugging
                     if event.key == p.K_SPACE:
-                        self.arrow.charge = True
+                        """# Spawn a new arrow at the player's position
+                        arrow_instance = Arrow(self, 'arrow', (100, 100), self.arrow.size)
+
+                        # Start charging the arrow
+                        arrow_instance.charge = True
+                        self.arrows.append(arrow_instance)
+                        self.bullets.append(Bullet(*self.pos))"""
+                if event.type == p.MOUSEBUTTONDOWN:
+                    self.bullets.append(Bullet(self, 'arrow', (self.player.pos[0] - self.cam_scroll[0], self.player.pos[1] - self.cam_scroll[1]), (32, 32)))
                 if event.type == p.KEYUP:
                     if event.key == p.K_a:
                         self.movement[0] = False  # Stops moving left
@@ -92,13 +107,26 @@ class Game:
                     if event.key == p.K_s:
                         self.interact = False
                     if event.key == p.K_SPACE:
-                        self.charge = False
+                        # For the latest arrow, stop charging and apply velocity
+                        if len(self.arrows) > 0:
+                            last_arrow = self.arrows[-1]
+                            last_arrow.charge = False
+                            last_arrow.velocity[0] +=  last_arrow.arrow_charge  # Apply velocity in X
+                            last_arrow.velocity[1] +=  last_arrow.arrow_charge  # Apply velocity in Y
+                            last_arrow.arrow_charge = 0  # Reset the charge
+            
 
+            for bullet in self.bullets[:]:
+                bullet.update()
+                """if not self.display.get_rect().collidepoint(bullet.pos):
+                    self.arrows.remove(bullet)"""
+            for bullet in self.bullets:
+                bullet.draw(self.display)
 
+            print(f"Arrow position: {self.arrow.pos}, velocity: {self.arrow.velocity}")
+            print(self.arrows)
             self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
             self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
-            self.arrow.update(self.tilemap, (0, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
-            self.arrow.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
 
             p.display.flip()
