@@ -42,8 +42,8 @@ class Game:
             'arrow' : load_image('Entity_sprites/Arrow/arrow.png')
         }
         print(self.assets)
-        self.player = EntityPhysics(self, 'player', (80, 1), (32, 32))#Runs the EntityPhysics code on self.player
-        self.arrow = Arrow(self, 'arrow', (0,0), (32, 32))
+        self.player = EntityPhysics(self, 'player', (400, 400), (32, 32))#Runs the EntityPhysics code on self.player
+        
         self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
         self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
         self.arrows = []
@@ -57,13 +57,13 @@ class Game:
             self.clock.tick(60)
             # Background always renders first to prevent things from being covered by it
             self.display.blit(self.bg, (0, 0))
-            print(str(self.cam_scroll[0]) + ',' + str(self.cam_scroll[1]))
-            self.cam_scroll[0] += (self.player.physics_rect().centerx - self.display.get_width() / 2 - self.cam_scroll[0]) / 10
+            # print(str(self.cam_scroll[0]) + ',' + str(self.cam_scroll[1]))
+            self.cam_scroll[0] += (self.player.physics_rect().centerx - self.display.get_width() / 2 - self.cam_scroll[0]) / 1
 
             self.tilemap.render(self.display, camera_scroll = self.cam_scroll)
             
-            self.pos = (self.player.pos[0] , self.player.pos[1] )
-
+            self.pos = self.player.pos
+            
 
             # ==== INPUTS ====#
             for event in p.event.get():
@@ -98,7 +98,8 @@ class Game:
                         self.arrows.append(arrow_instance)
                         self.bullets.append(Bullet(*self.pos))"""
                 if event.type == p.MOUSEBUTTONDOWN:
-                    self.bullets.append(Bullet(self, 'arrow', (self.player.pos[0] - self.cam_scroll[0], self.player.pos[1] - self.cam_scroll[1]), (32, 32)))
+                    self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll))
+                    # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos))
                 if event.type == p.KEYUP:
                     if event.key == p.K_a:
                         self.movement[0] = False  # Stops moving left
@@ -123,8 +124,6 @@ class Game:
             for bullet in self.bullets:
                 bullet.draw(self.display)
 
-            print(f"Arrow position: {self.arrow.pos}, velocity: {self.arrow.velocity}")
-            print(self.arrows)
             self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
             self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
@@ -132,4 +131,5 @@ class Game:
             p.display.flip()
 
 # Calls the class and runs the game.
-Game().run()
+if __name__ == "__main__":
+    Game().run()
