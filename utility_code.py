@@ -11,4 +11,4 @@ def load_images(path):
     images = [] #List of all loaded images
     for img_name in os.listdir(BASE_IMAGE_PATH + path): # operating_system.list_directory
         images.append(load_image(path + '/' + img_name)) # appends the load_image's loaded image onto the list that contains all loaded images
-        return images
+    return images #indentation go brr
