@@ -7,8 +7,7 @@ from Scripts.entities import Bullet
 from Scripts.tilemap import Tilemap
 import sys
 
-
-
+ 
 class Game:
     def __init__(self):
         # Initialize/activate pygame
@@ -31,7 +30,7 @@ class Game:
 
         self.movement = [False, False]
         
-
+        #This loads all of the assets for tiles and entities into one dictionary so that it can easily be accessed selsewhere in the code
         self.assets = {
             'grass': load_images('Tiles/Grass'),
             'path': load_images('Tiles/Path'),
@@ -46,12 +45,14 @@ class Game:
         
         self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
         self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
-        self.arrows = []
         self.bullets = []
         
-
+        
 
     def run(self):
+
+        
+
         while True:
             # This is the code to set the fps
             self.clock.tick(60)
@@ -70,6 +71,7 @@ class Game:
                 if event.type == p.QUIT:  # Quit the game
                     p.quit()  # Closes pygame
                     sys.exit()  # Quits the program
+                
                 if event.type == p.KEYDOWN:  # Movement
                     if event.key == p.K_a:
                         self.movement[0] = True  # Moves left
@@ -90,16 +92,19 @@ class Game:
                                         #else:
                                             #print(f"No variant 1 available for {tile['type']}")  # Debugging
                     if event.key == p.K_SPACE:
-                        """# Spawn a new arrow at the player's position
-                        arrow_instance = Arrow(self, 'arrow', (100, 100), self.arrow.size)
+                        # Spawn a new arrow at the player's position
+                        arrow_instance = Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll)
 
                         # Start charging the arrow
                         arrow_instance.charge = True
-                        self.arrows.append(arrow_instance)
-                        self.bullets.append(Bullet(*self.pos))"""
-                if event.type == p.MOUSEBUTTONDOWN:
-                    self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll))
+                        
+                        self.bullets.append(arrow_instance)
+                # if event.type == p.MOUSEBUTTONDOWN:
+                    # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll))
                     # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos))
+                    if event.key == p.K_ESCAPE:
+                        p.quit()  # Closes pygame
+                        sys.exit()  # Quits the program
                 if event.type == p.KEYUP:
                     if event.key == p.K_a:
                         self.movement[0] = False  # Stops moving left
@@ -108,17 +113,17 @@ class Game:
                     if event.key == p.K_s:
                         self.interact = False
                     if event.key == p.K_SPACE:
-                        # For the latest arrow, stop charging and apply velocity
-                        if len(self.arrows) > 0:
-                            last_arrow = self.arrows[-1]
+                        if len(self.bullets) > 0:
+                            last_arrow = self.bullets[-1]
                             last_arrow.charge = False
                             last_arrow.velocity[0] +=  last_arrow.arrow_charge  # Apply velocity in X
-                            last_arrow.velocity[1] +=  last_arrow.arrow_charge  # Apply velocity in Y
+                            last_arrow.velocity[1] -=  last_arrow.arrow_charge  # Apply velocity in Y
                             last_arrow.arrow_charge = 0  # Reset the charge
+                            
             
 
             for bullet in self.bullets[:]:
-                bullet.update()
+                bullet.update(self.tilemap)
                 """if not self.display.get_rect().collidepoint(bullet.pos):
                     self.arrows.remove(bullet)"""
             for bullet in self.bullets:
