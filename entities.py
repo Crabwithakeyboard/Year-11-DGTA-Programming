@@ -171,9 +171,7 @@ class Arrow:
         p.draw.circle(surf, p.Color(225,225,0), self.dir, 10)
         p.draw.line(surf, p.Color(0, 0, 255), self.pos, (self.pos[0] - self.velocity[0], self.pos[1] + self.velocity[1]))
 
-
-# I don't know how this works and I have to sleep
-"""class Bow:
+class Bow:
     def __init__(self, main, entity_type, pos, size):
         self.main = main #This is so that everything inside the 'main.py' file is accessible
         self.type = entity_type #The type of entitie
@@ -247,5 +245,5 @@ class Arrow:
     
     def render(self, surf, camera_scroll=(0, 0)):
         bow_rect = self.rotated_bow_image.get_rect(center = self.pos)
-        surf.blit(self.main.assets['bow'], bow_rect)
-        p.draw.circle(surf, p.Color(225,225,0), self.pos, 10)"""
+        surf.blit(self.rotated_bow_image, bow_rect)
+        p.draw.circle(surf, p.Color(225,225,0), self.pos, 10)
