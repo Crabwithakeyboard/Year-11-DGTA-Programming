@@ -3,7 +3,7 @@ from pygame import image
 from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
 from Scripts.entities import Arrow
-from Scripts.entities import Bow
+# from Scripts.entities import Bow
 from Scripts.tilemap import Tilemap
 import sys
 
@@ -39,7 +39,7 @@ class Game:
             'stool': load_images('Tiles/Stool'),
             'player': load_image('Entity_sprites/Player/Player.png'),
             'arrow' : load_image('Entity_sprites/Arrow/arrow.png'),
-            'bow' : load_image('Entity_sprites/Player_items/bow.png')
+            'bow_equipped' : load_image('Entity_sprites/Player_items/bow.png')
         }
         print(self.assets)
         self.player = EntityPhysics(self, 'player', (400, 400), (32, 32))#Runs the EntityPhysics code on self.player
@@ -92,18 +92,19 @@ class Game:
                                         if len(self.assets[tile['type']]) > 1:
                                             tile['var'] = 1  # Set the stool variant to 1
                                             self.equip_bow = True
-                                            self.player_bow = Bow(self, 'bow', (self.pos[0] + 10 , self.pos[1] + 10 ), (32, 32))
+                                            self.player.entity_type = 'stool'
+                                            # self.player_bow = Bow(self, 'bow', (400, 400 ), (32, 32))
                                             #print(f"Stool at {tile['pos']} changed to variant {tile['var']}")  # Debugging
                                         #else:
                                             #print(f"No variant 1 available for {tile['type']}")  # Debugging
                     if event.key == p.K_SPACE:
-                        # Spawn a new arrow at the player's position
-                        arrow_instance = Arrow(self, 'arrow', (self.pos[0] + 10 - self.cam_scroll[0], self.pos[1] + 10 - self.cam_scroll[1]), (32, 32))
-                        
-                        # Start charging the arrow
-                        arrow_instance.charge = True
-                        
-                        self.arrows.append(arrow_instance)
+                        if self.equip_bow:
+                            # Spawn a new arrow at the player's position
+                            arrow_instance = Arrow(self, 'arrow', (self.pos[0] + 10 - self.cam_scroll[0], self.pos[1] + 10 - self.cam_scroll[1]), (32, 32))
+                            
+                            # Start charging the arrow
+                            arrow_instance.charge = True
+                            self.arrows.append(arrow_instance)
                 # if event.type == p.MOUSEBUTTONDOWN:
                     # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll))
                     # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos))
@@ -134,9 +135,9 @@ class Game:
                 arrow.draw(self.display, camera_scroll=self.cam_scroll)
 
             print(self.equip_bow)
-            if self.equip_bow and self.player_bow is not None:
-                self.player_bow.update()
-                self.player_bow.render(self.display, camera_scroll=self.cam_scroll)
+            # if self.equip_bow and self.player_bow is not None:
+            #     self.player_bow.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0))
+            #     self.player_bow.render(self.display, camera_scroll=self.cam_scroll)
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
             
             p.display.flip()
