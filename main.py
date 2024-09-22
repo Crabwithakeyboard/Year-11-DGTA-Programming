@@ -3,7 +3,7 @@ from pygame import image
 from Scripts.utility_code import load_image, load_images
 from Scripts.entities import EntityPhysics
 from Scripts.entities import Arrow
-from Scripts.entities import Bullet
+from Scripts.entities import Bow
 from Scripts.tilemap import Tilemap
 import sys
 
@@ -38,14 +38,16 @@ class Game:
             'decor': load_images('Tiles/Decor'),
             'stool': load_images('Tiles/Stool'),
             'player': load_image('Entity_sprites/Player/Player.png'),
-            'arrow' : load_image('Entity_sprites/Arrow/arrow.png')
+            'arrow' : load_image('Entity_sprites/Arrow/arrow.png'),
+            'bow' : load_image('Entity_sprites/Player_items/bow.png')
         }
         print(self.assets)
         self.player = EntityPhysics(self, 'player', (400, 400), (32, 32))#Runs the EntityPhysics code on self.player
-        
+        self.equip_bow = False
+        self.player_bow = None
         self.tilemap = Tilemap(self, tile_size=32) #render's the tilemap
         self.cam_scroll = [0, 0] # camera movement, it in itially starts at the top corner of the screen.
-        self.bullets = []
+        self.arrows = []
         
         
 
@@ -64,7 +66,8 @@ class Game:
             self.tilemap.render(self.display, camera_scroll = self.cam_scroll)
             
             self.pos = self.player.pos
-            
+            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
+            self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
 
             # ==== INPUTS ====#
             for event in p.event.get():
@@ -83,22 +86,24 @@ class Game:
                         self.interact = True #If player presses 's' key, then the player is trying to interact with something, so set the interact value to true.
                         for rect in self.tilemap.interact_rects(self.player.pos): # runs the indented code for every tile in the 'inter_rects' list in the interact_rects function in tilemap.py
                             if self.player.physics_rect().colliderect(rect): # Checks if the player's collision hitbox collides with the interactive rects' hitbox
-                                print('Interacted') #Used in testing to check if the player has actually interacted with the tile
+                                # print('Interacted') #Used in testing to check if the player has actually interacted with the tile
                                 for loc, tile in self.tilemap.tilemap.items(): 
                                     if tile['type'] == 'stool' and tile['pos'] == (rect.x // self.tilemap.tile_size, rect.y // self.tilemap.tile_size):
                                         if len(self.assets[tile['type']]) > 1:
                                             tile['var'] = 1  # Set the stool variant to 1
+                                            self.equip_bow = True
+                                            self.player_bow = Bow(self, 'bow', (self.pos[0] + 10 , self.pos[1] + 10 ), (32, 32))
                                             #print(f"Stool at {tile['pos']} changed to variant {tile['var']}")  # Debugging
                                         #else:
                                             #print(f"No variant 1 available for {tile['type']}")  # Debugging
                     if event.key == p.K_SPACE:
                         # Spawn a new arrow at the player's position
-                        arrow_instance = Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll)
-
+                        arrow_instance = Arrow(self, 'arrow', (self.pos[0] + 10 - self.cam_scroll[0], self.pos[1] + 10 - self.cam_scroll[1]), (32, 32))
+                        
                         # Start charging the arrow
                         arrow_instance.charge = True
                         
-                        self.bullets.append(arrow_instance)
+                        self.arrows.append(arrow_instance)
                 # if event.type == p.MOUSEBUTTONDOWN:
                     # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos, self.cam_scroll))
                     # self.bullets.append(Bullet(self, 'arrow', (self.pos[0] - self.cam_scroll[0], self.pos[1] - self.cam_scroll[1]), (32, 32), self.pos))
@@ -113,26 +118,27 @@ class Game:
                     if event.key == p.K_s:
                         self.interact = False
                     if event.key == p.K_SPACE:
-                        if len(self.bullets) > 0:
-                            last_arrow = self.bullets[-1]
+                        if len(self.arrows) > 0:
+                            last_arrow = self.arrows[-1]
                             last_arrow.charge = False
-                            last_arrow.velocity[0] +=  last_arrow.arrow_charge  # Apply velocity in X
-                            last_arrow.velocity[1] -=  last_arrow.arrow_charge  # Apply velocity in Y
+                            last_arrow.speed +=  last_arrow.arrow_charge
+                            # last_arrow.velocity[0] +=  last_arrow.arrow_charge  # Apply velocity in X
+                            # last_arrow.velocity[1] -=  last_arrow.arrow_charge  # Apply velocity in Y
                             last_arrow.arrow_charge = 0  # Reset the charge
-                            
-            
 
-            for bullet in self.bullets[:]:
-                bullet.update(self.tilemap)
-                """if not self.display.get_rect().collidepoint(bullet.pos):
-                    self.arrows.remove(bullet)"""
-            for bullet in self.bullets:
-                bullet.draw(self.display)
+            for arrow in self.arrows[:]:
+                if arrow.charge:
+                    arrow.update(self.tilemap, player_pos=self.player.pos)  # Update arrow while charging with player position
+                else:
+                    arrow.update(self.tilemap)  # After release, arrow moves independently
+                arrow.draw(self.display, camera_scroll=self.cam_scroll)
 
-            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0)) # calculates player movement. x-axis movement boolean from y-adis movement boolean
-            self.player.render(self.display, camera_scroll = self.cam_scroll) #renders the player entity onto the display
+            print(self.equip_bow)
+            if self.equip_bow and self.player_bow is not None:
+                self.player_bow.update()
+                self.player_bow.render(self.display, camera_scroll=self.cam_scroll)
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
-
+            
             p.display.flip()
 
 # Calls the class and runs the game.
