@@ -79,9 +79,7 @@ class Game:
                     if event.key == p.K_a:
                         self.movement[0] = True  # Moves left
                     if event.key == p.K_d:
-                        self.movement[1] = True  # Moves right
-                    if event.key == p.K_w:
-                        self.player.velocity[1] = -4 #upward velocity set to 4, makes player jump
+                        self.movement[1] = True  # Moves rights
                     if event.key == p.K_s:
                         self.interact = True #If player presses 's' key, then the player is trying to interact with something, so set the interact value to true.
                         for rect in self.tilemap.interact_rects(self.player.pos): # runs the indented code for every tile in the 'inter_rects' list in the interact_rects function in tilemap.py
@@ -135,7 +133,7 @@ class Game:
 
             print(self.equip_bow)
             if self.equip_bow and self.player_bow is not None:
-                self.player_bow.update(self.tilemap, ((self.movement[1] - self.movement[0]) * 2, 0))
+                self.player_bow.update(self.tilemap, (0, 0))
                 self.player_bow.render(self.display, camera_scroll=(0, 0))
             self.win.blit(p.transform.scale(self.display, self.screen_size), (0, 0))
             
